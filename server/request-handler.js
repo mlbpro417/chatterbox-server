@@ -143,13 +143,20 @@ exports.requestHandler = function(request, response) {
       response.end(message);
       
     } else {
-      
-      message = JSON.stringify('some other method');
-      var statusCode = 200;
-      var headers = defaultCorsHeaders;
-      headers['Content-Type'] = 'application/json';
-      response.writeHead(statusCode, headers);
-      response.end(message);
+      // handles PUT and DELETE 
+      var optionsHeaders = {
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'access-control-allow-headers': 'content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key',  
+        'access-control-max-age': 10, // Seconds.
+        'Allow': 'GET, POST, OPTIONS' 
+      };
+      // message = JSON.stringify('some other method');
+      var statusCode = 405;
+      //var headers = defaultCorsHeaders;
+      //headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, optionsHeaders);
+      response.end();
       
     }
   } else if (request.url === '/') {

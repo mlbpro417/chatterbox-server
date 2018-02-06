@@ -73,5 +73,40 @@ describe('server', function() {
     });
   });
 
+  it('Should 405 when asked for a PUT method', function(done) {
+    var requestParams = {method: 'PUT',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+    };
 
+    request(requestParams, function(error, response, body) {
+      expect(response.statusCode).to.equal(405);
+      expect(response.headers).to.have.property('allow');
+      done();
+    });
+  });
+  
+  it('Should 405 when asked for a DELETE method', function(done) {
+    var requestParams = {method: 'DELETE',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+    };
+
+    request(requestParams, function(error, response, body) {
+      expect(response.statusCode).to.equal(405);
+      expect(response.headers).to.have.property('allow');
+      done();
+    });
+  });
+  
+  // we want to check to see if the header we want is there
+  it('OPTIONS method should have header with allow property', function(done) {
+    var requestParams = {method: 'OPTIONS',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+    };
+
+    request(requestParams, function(error, response, body) {
+      expect(response.statusCode).to.equal(200);
+      expect(response.headers).to.have.property('allow');
+      done();
+    });
+  });
 });

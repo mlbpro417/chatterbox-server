@@ -115,5 +115,40 @@ describe('Node Server Request Listener Function', function() {
         expect(res._responseCode).to.equal(404);
       });
   });
+  
+  it('Should 405 when asked for a PUT method', function() {
+    
+    var req = new stubs.request('/classes/messages', 'PUT');
+    var res = new stubs.response();
 
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(405);
+    expect(res._headers).to.have.property('Allow');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should 405 when asked for a DELETE method', function() {
+    
+    var req = new stubs.request('/classes/messages', 'DELETE');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(405);
+    expect(res._headers).to.have.property('Allow');
+    expect(res._ended).to.equal(true);
+  });
+  
+  it('OPTIONS method should have header with Allow property', function() {
+    
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    expect(res._headers).to.have.property('Allow');
+    expect(res._ended).to.equal(true);
+  });
 });
