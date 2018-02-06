@@ -198,7 +198,8 @@ exports.requestHandler = function(request, response) {
       '.pdf': 'application/pdf',
       '.doc': 'application/msword',
       '.eot': 'application/vnd.ms-fontobject',
-      '.ttf': 'application/font-sfnt'
+      '.ttf': 'application/font-sfnt',
+      '.gif': 'image/gif'
     };
 
     console.log('pathname is', pathname);
@@ -209,6 +210,7 @@ exports.requestHandler = function(request, response) {
     // use fs.stat
     fs.stat(pathname, function(err, stats) {
       console.log(stats);
+      // if the file doesn't exist
       if (stats === undefined) {
         var statusCode = 404;
         console.log('this is our status code', statusCode);
@@ -224,6 +226,7 @@ exports.requestHandler = function(request, response) {
       // use fs.readFile
       fs.readFile(pathname, function(err, data) {
         if (err) {
+          // if theres an error return an error
           var statusCode = 500;
           console.log('error reading file', statusCode);
           response.writeHead(statusCode);
@@ -235,72 +238,22 @@ exports.requestHandler = function(request, response) {
           if (fileType === undefined) {
             fileType = 'text/plain';
           } 
-           
+          console.log('extension, pathname, and fileType', extension, pathname, fileType);
+          var statusCode = 200;
+          var optionsHeaders = {
+            'access-control-allow-origin': '*',
+            'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'access-control-allow-headers': 'content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key',  
+            'access-control-max-age': 10, // Seconds.
+            'content-type': fileType
+          }; 
+          response.writeHead(statusCode, optionsHeaders);
+          // send the file
+          response.end(data);
         }
       });  
-      // if theres an error return an error
-      // send the file
     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // fs.exists(pathname, function (exist) {
-    //   if(!exist) {
-    //     // if the file is not found, return 404
-    //     response.statusCode = 404;
-    //     response.end(`File ${pathname} not found!`);
-    //     return;
-    //   }
-    //   // if is a directory, then look for index.html
-    //   if (fs.statSync(pathname).isDirectory()) {
-    //     pathname += '/index.html';
-    //   }
-    //   // read file from file system
-    //   fs.readFile(pathname, function(err, data){
-    //     if(err){
-    //       response.statusCode = 500;
-    //       response.end(`Error getting the file: ${err}.`);
-    //     } else {
-    //       // based on the URL path, extract the file extention. e.g. .js, .doc, ...
-    //       const ext = path.parse(pathname).ext;
-    //       // if the file is found, set Content-type and send data
-    //       response.setHeader('Content-type', mimeType[ext] || 'text/plain' );
-    //       response.end(data);
-    //     }
-    //   });
-    // });
-
-
-    //REPLACE LATER
-
-    // message = 'Sweet Home Alabama';
-    // var statusCode = 200;
-    // var headers = defaultCorsHeaders;
-    // headers['Content-Type'] = 'application/json';
-    // response.writeHead(statusCode, headers);
-    // response.end(message);
-  
   }
-
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
