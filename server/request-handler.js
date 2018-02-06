@@ -18,14 +18,16 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var dummyData = {
-  results:
-    [
-      {"objectId":"qvBx1fkdiJ","username":"Mike","roomname":"lobby","text":"Super","createdAt":"2018-02-05T22:23:41.053Z","updatedAt":"2018-02-05T22:23:41.053Z"},
-      {"objectId":"cb7RQqGhqv","username":"chatterbug","text":"chatterbug chatterbug chatterbug!","roomname":"lobby","createdAt":"2018-02-05T22:22:18.969Z","updatedAt":"2018-02-05T22:22:18.969Z"},
-      {"objectId":"eGyugj6y08","username":"hello%20world","text":"woe is me","roomname":"lobby","createdAt":"2018-02-05T19:30:53.268Z","updatedAt":"2018-02-05T19:30:53.268Z"},{"objectId":"5zHgPe8M8E","username":"hello%20world","text":"still works","roomname":"lobby","createdAt":"2018-02-05T19:19:01.052Z","updatedAt":"2018-02-05T19:19:01.052Z"},{"objectId":"mfKITzNIQN","username":"RicochetRobot","roomname":"lobby","text":"boo","createdAt":"2018-02-04T21:38:49.116Z","updatedAt":"2018-02-04T21:38:49.116Z"},
-    ],
-};
+// var dummyData = {
+//   results:
+//     [
+//       {"objectId":"qvBx1fkdiJ","username":"Mike","roomname":"lobby","text":"Super","createdAt":"2018-02-05T22:23:41.053Z","updatedAt":"2018-02-05T22:23:41.053Z"},
+//       {"objectId":"cb7RQqGhqv","username":"chatterbug","text":"chatterbug chatterbug chatterbug!","roomname":"lobby","createdAt":"2018-02-05T22:22:18.969Z","updatedAt":"2018-02-05T22:22:18.969Z"},
+//       {"objectId":"eGyugj6y08","username":"hello%20world","text":"woe is me","roomname":"lobby","createdAt":"2018-02-05T19:30:53.268Z","updatedAt":"2018-02-05T19:30:53.268Z"},{"objectId":"5zHgPe8M8E","username":"hello%20world","text":"still works","roomname":"lobby","createdAt":"2018-02-05T19:19:01.052Z","updatedAt":"2018-02-05T19:19:01.052Z"},{"objectId":"mfKITzNIQN","username":"RicochetRobot","roomname":"lobby","text":"boo","createdAt":"2018-02-04T21:38:49.116Z","updatedAt":"2018-02-04T21:38:49.116Z"},
+//     ],
+// };
+
+var messageList = {results: []};
 
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -49,10 +51,16 @@ exports.requestHandler = function(request, response) {
   var message;
 
   if (request.url === '/classes/messages' || request.url === '/classes/messages?order=-createdAt') {
-    message = JSON.stringify(dummyData);
+    message = JSON.stringify(messageList);
     if (request.method === 'GET') {
       
-      message = JSON.stringify(dummyData);
+      message = JSON.stringify(messageList);
+      // The outgoing status.
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+      response.end(message);
       
     } else if (request.method === 'POST') {
       // message = JSON.stringify('something posted');
@@ -64,24 +72,20 @@ exports.requestHandler = function(request, response) {
         body = Buffer.concat(body).toString();
         // at this point, `body` has the entire request body stored in it as a string
 
-        console.log('POST body is ', body);
-        // username=chatterbug&text=blah+blahbitty&roomname=lobby
+        // console.log('POST body is ', body);
         
         // parse the body into username, text, roomname
-        // body = body.split('&'); //[user, text, room]
         body = JSON.parse(body);
+        
         // create a message object
-        var newMessage = {
-          // username: body[0].slice(9),
-          // text: body[1].slice(5),
-          // roomname: body[2].slice(9)
-          username: body.username,
-          text: body.text,
-          roomname: body.roomname
-        };
-        console.log(newMessage);
+        // var newMessage = {
+        //   username: body.username,
+        //   text: body.text || body.message,
+        //   roomname: body.roomname || 'lobby'
+        // };
+        // console.log(newMessage);
         // push it to our messages array
-        dummyData.results.push(newMessage);
+        messageList.results.push(body);
 
         // send 201 response      
         var statusCode = 201;
@@ -95,14 +99,30 @@ exports.requestHandler = function(request, response) {
     } else if (request.method === 'OPTIONS') {
       
       message = JSON.stringify('options options');
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+      response.end(message);
       
     } else {
       
       message = JSON.stringify('some other method');
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'application/json';
+      response.writeHead(statusCode, headers);
+      response.end(message);
       
     }
   } else if (request.url === '/') {
     message = 'Sweet Home Alabama';
+    var statusCode = 200;
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'application/json';
+    response.writeHead(statusCode, headers);
+    response.end(message);
+
   } else {
     var statusCode = 404;
     var headers = defaultCorsHeaders;
@@ -110,32 +130,7 @@ exports.requestHandler = function(request, response) {
     response.writeHead(statusCode, headers);
     response.end('These ARENT the droids you\'re looking 404' );
   }
-  
-  
-  // The outgoing status.
-  var statusCode = 200;
 
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
-
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/json';
-
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
-
-  // Make sure to always call response.end() - Node may not send
-  // anything back to the client until you do. The string you pass to
-  // response.end() will be the body of the response - i.e. what shows
-  // up in the browser.
-  //
-  // Calling .end "flushes" the response's internal buffer, forcing
-  // node to actually send all the data over to the client.
-  response.end(message);
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).

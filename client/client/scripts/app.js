@@ -43,6 +43,8 @@ var app = {
       url: app.server,
       type: 'POST',
       data: JSON.stringify(message),
+      // data: message,
+      contentType: 'application/json',
       success: function (data) {
         // Clear messages input
         app.$message.val('');
