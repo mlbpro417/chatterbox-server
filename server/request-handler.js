@@ -103,10 +103,41 @@ exports.requestHandler = function(request, response) {
       
       
     } else if (request.method === 'OPTIONS') {
-      
-      message = JSON.stringify('options options');
+      var optionsHeaders = {
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'access-control-allow-headers': 'content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key',  
+        'access-control-max-age': 10, // Seconds.
+        'Allow': 'GET, POST, OPTIONS' 
+      };
+      var apiDescription = 
+        {
+          "POST": {
+            "description": "Post a message",
+            "parameters": {
+              "text": {
+                "type": "string",
+                "description": "Message text",
+              },
+              "username": {
+                "type": "string",
+                "description": "Your username",
+              },
+              "roomname": {
+                "type": "string",
+                "description": "Name of the room to chat in"
+              },
+            },
+            "example": {
+              "text": "I found a bug!",
+              "username": "Beth",
+              "roomname": "lobby"
+            }
+          }
+        };
+      message = JSON.stringify(apiDescription);
       var statusCode = 200;
-      var headers = defaultCorsHeaders;
+      var headers = optionsHeaders;
       headers['Content-Type'] = 'application/json';
       response.writeHead(statusCode, headers);
       response.end(message);
