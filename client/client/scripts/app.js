@@ -48,6 +48,7 @@ var app = {
       success: function (data) {
         // Clear messages input
         app.$message.val('');
+        // debugger;
 
         // Trigger a fetch to update the messages, pass true to animate
         app.fetch();

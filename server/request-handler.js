@@ -18,6 +18,8 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var uuidv1 = require('uuid/v1');
+
 // var dummyData = {
 //   results:
 //     [
@@ -51,11 +53,21 @@ exports.requestHandler = function(request, response) {
   var message;
 
   if (request.url === '/classes/messages' || request.url === '/classes/messages?order=-createdAt') {
-    message = JSON.stringify(messageList);
+    // message = JSON.stringify(messageList);
     if (request.method === 'GET') {
-      
-      message = JSON.stringify(messageList);
-      // The outgoing status.
+      if (messageList.results.length === 0) {
+        message = JSON.stringify({ 
+          results: [ {
+            objectId: uuidv1(),
+            username: 'Beth',
+            text: 'I love bugs!',
+            roomname: 'lobby'
+          }
+          ]
+        });
+      } else { 
+        message = JSON.stringify(messageList);
+      } // The outgoing status.
       var statusCode = 200;
       var headers = defaultCorsHeaders;
       headers['Content-Type'] = 'application/json';
@@ -76,23 +88,17 @@ exports.requestHandler = function(request, response) {
         
         // parse the body into username, text, roomname
         body = JSON.parse(body);
+        body.objectId = uuidv1();
         
-        // create a message object
-        // var newMessage = {
-        //   username: body.username,
-        //   text: body.text || body.message,
-        //   roomname: body.roomname || 'lobby'
-        // };
-        // console.log(newMessage);
         // push it to our messages array
         messageList.results.push(body);
 
         // send 201 response      
         var statusCode = 201;
         var headers = defaultCorsHeaders;
-        // headers['Content-Type'] = 'text/plain';
+        headers['Content-Type'] = 'text/plain';
         response.writeHead(statusCode, headers);
-        response.end('');
+        response.end('SUCCESSFULLY CREATED');
       });
       
       
