@@ -11,14 +11,18 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var uuidv1 = require('uuid/v1');
+var url = require('url');
+var fs = require('fs');
+var path = require('path');
+
+
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key',  
   'access-control-max-age': 10 // Seconds.
 };
-
-var uuidv1 = require('uuid/v1');
 
 // var dummyData = {
 //   results:
@@ -159,20 +163,142 @@ exports.requestHandler = function(request, response) {
       response.end();
       
     }
-  } else if (request.url === '/') {
-    message = 'Sweet Home Alabama';
-    var statusCode = 200;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'application/json';
-    response.writeHead(statusCode, headers);
-    response.end(message);
+  // } else if (request.url === '/') {
+  //   message = 'Sweet Home Alabama';
+  //   var statusCode = 200;
+  //   var headers = defaultCorsHeaders;
+  //   headers['Content-Type'] = 'application/json';
+  //   response.writeHead(statusCode, headers);
+  //   response.end(message);
 
+  // } else {
+  //   var statusCode = 404;
+  //   var headers = defaultCorsHeaders;
+  //   headers['Content-Type'] = 'text/plain';
+  //   response.writeHead(statusCode, headers);
+  //   response.end('These ARENT the droids you\'re looking 404' );
+  // }
   } else {
-    var statusCode = 404;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'text/plain';
-    response.writeHead(statusCode, headers);
-    response.end('These ARENT the droids you\'re looking 404' );
+    // parse URL
+    const parsedUrl = url.parse(request.url);
+    // extract URL path
+    let pathname = `.${parsedUrl.pathname}`;
+    // maps file extention to MIME types
+    const mimeType = {
+      '.ico': 'image/x-icon',
+      '.html': 'text/html',
+      '.js': 'text/javascript',
+      '.json': 'application/json',
+      '.css': 'text/css',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.wav': 'audio/wav',
+      '.mp3': 'audio/mpeg',
+      '.svg': 'image/svg+xml',
+      '.pdf': 'application/pdf',
+      '.doc': 'application/msword',
+      '.eot': 'application/vnd.ms-fontobject',
+      '.ttf': 'application/font-sfnt'
+    };
+
+    console.log('pathname is', pathname);
+    pathname = '../client/client/' + pathname;
+    console.log('new pathname is', pathname); 
+
+    // check if the filename exists
+    // use fs.stat
+    fs.stat(pathname, function(err, stats) {
+      console.log(stats);
+      if (stats === undefined) {
+        var statusCode = 404;
+        console.log('this is our status code', statusCode);
+        response.writeHead(statusCode);
+        response.end();
+      } else if (stats.isDirectory()) {
+        // if the file is a directory, search for index.html inside of it
+        // use fs.isDirectory
+        pathname = pathname + '/index.html';
+        console.log('this is our new pathname', pathname);
+      }
+      // otherwise try to open the file
+      // use fs.readFile
+      fs.readFile(pathname, function(err, data) {
+        if (err) {
+          var statusCode = 500;
+          console.log('error reading file', statusCode);
+          response.writeHead(statusCode);
+          response.end();
+        } else {
+          // read file succesfully
+          var extension = path.extname(pathname);
+          var fileType = mimeType[extension];
+          if (fileType === undefined) {
+            fileType = 'text/plain';
+          } 
+           
+        }
+      });  
+      // if theres an error return an error
+      // send the file
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // fs.exists(pathname, function (exist) {
+    //   if(!exist) {
+    //     // if the file is not found, return 404
+    //     response.statusCode = 404;
+    //     response.end(`File ${pathname} not found!`);
+    //     return;
+    //   }
+    //   // if is a directory, then look for index.html
+    //   if (fs.statSync(pathname).isDirectory()) {
+    //     pathname += '/index.html';
+    //   }
+    //   // read file from file system
+    //   fs.readFile(pathname, function(err, data){
+    //     if(err){
+    //       response.statusCode = 500;
+    //       response.end(`Error getting the file: ${err}.`);
+    //     } else {
+    //       // based on the URL path, extract the file extention. e.g. .js, .doc, ...
+    //       const ext = path.parse(pathname).ext;
+    //       // if the file is found, set Content-type and send data
+    //       response.setHeader('Content-type', mimeType[ext] || 'text/plain' );
+    //       response.end(data);
+    //     }
+    //   });
+    // });
+
+
+    //REPLACE LATER
+
+    // message = 'Sweet Home Alabama';
+    // var statusCode = 200;
+    // var headers = defaultCorsHeaders;
+    // headers['Content-Type'] = 'application/json';
+    // response.writeHead(statusCode, headers);
+    // response.end(message);
+  
   }
 
 };
