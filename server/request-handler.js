@@ -163,21 +163,6 @@ exports.requestHandler = function(request, response) {
       response.end();
       
     }
-  // } else if (request.url === '/') {
-  //   message = 'Sweet Home Alabama';
-  //   var statusCode = 200;
-  //   var headers = defaultCorsHeaders;
-  //   headers['Content-Type'] = 'application/json';
-  //   response.writeHead(statusCode, headers);
-  //   response.end(message);
-
-  // } else {
-  //   var statusCode = 404;
-  //   var headers = defaultCorsHeaders;
-  //   headers['Content-Type'] = 'text/plain';
-  //   response.writeHead(statusCode, headers);
-  //   response.end('These ARENT the droids you\'re looking 404' );
-  // }
   } else {
     // parse URL
     const parsedUrl = url.parse(request.url);
